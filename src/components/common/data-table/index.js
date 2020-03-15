@@ -26,16 +26,12 @@ import classnames from 'classnames';
 import get from 'lodash.get';
 import debounce from 'lodash.debounce';
 
-// import MoreIcon from 'react-icons/lib/fa/ellipsis-h';
 import {VertThreeDots} from 'components/common/icons';
 import FieldToken from 'components/common/field-token';
 import OptionDropdown from './option-dropdown';
 
-// import {TiCancel} from 'react-icons/ti';
 // import without from 'lodash/without';
 // import union from 'lodash/union';
-
-// import {Pin, UpArrow, DownArrow} from '@uber/react-inline-icons';
 
 import Grid from './grid';
 import Button from './button';

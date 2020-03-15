@@ -20,10 +20,9 @@
 
 import React, {Component} from 'react';
 import debounce from 'lodash.debounce';
-import styled from 'styled-components';
 import {canUseDOM} from 'exenv';
-import {Motion, spring} from 'react-motion';
-import Portal from 'react-portal/lib/Portal';
+// import {Motion, spring} from 'react-motion';
+// import Portal from 'react-portal/lib/Portal';
 import Modal from 'react-modal';
 
 const listeners = {};
@@ -63,22 +62,22 @@ function subscribe(fn) {
   return () => delete listeners[id];
 }
 
-const Overlay = styled.div`
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-`;
+// const Overlay = styled.div`
+//   position: fixed;
+//   top: 0;
+//   left: 0;
+//   right: 0;
+//   bottom: 0;
+// `;
 
-const Reset = styled.div`
-  font-size: 12px;
-  font-family: 'Lato', 'Open Sans';
+// const Reset = styled.div`
+//   font-size: 12px;
+//   font-family: 'Lato', 'Open Sans';
 
-  * {
-    box-sizing: border-box;
-  }
-`;
+//   * {
+//     box-sizing: border-box;
+//   }
+// `;
 export default class Portaled extends Component {
   static defaultProps = {
     left: 0,
@@ -199,8 +198,8 @@ export default class Portaled extends Component {
           this.element = element;
         }}
       >
-        <Portal className="portal" {...portalProps}>
-          {overlay && (
+        <Modal className="portal" {...portalProps}>
+          {/* {overlay && (
             <Overlay
               key="overlay"
               onClick={() => overlay()}
@@ -210,7 +209,7 @@ export default class Portaled extends Component {
                 pointerEvents: isVisible ? 'auto' : 'none'
               }}
             />
-          )}
+          )} */}
           <div
             key="item"
             style={{
@@ -220,10 +219,9 @@ export default class Portaled extends Component {
               ...horizontalPosition
             }}
           >
-            {/* {children(motion, isVisible, isAnimated)} */}
             {children}
           </div>
-        </Portal>
+        </Modal>
       </Comp>
     );
   }
