@@ -23,6 +23,8 @@ import styled from 'styled-components';
 import classnames from 'classnames';
 import {Pin, ArrowDown, Clipboard, Cancel} from 'components/common/icons';
 import ClickOutsideCloseDropdown from 'components/side-panel/panel-dropdown';
+import MoreOptions from './more-options';
+import Portaled from './portaled';
 
 const StyledOptionsDropdown = styled.div`
   transition: ${props => props.theme.transitionSlow};
@@ -51,75 +53,89 @@ export default class OptionDropdown extends Component {
     } = this.props;
     const onClose = () => toggleMoreOptions(column);
     return (
-      <StyledOptionsDropdown show={isOpened} className={`${column}-dropdown`}>
-        <ClickOutsideCloseDropdown
-          className="panel-header-dropdown__inner"
-          show={isOpened}
-          onClose={onClose}
+      <Portaled
+        // motionStyle={(spring, visible) => ({
+        //   opacity: visible ? 1 : 0
+        // })}
+        isOpened={isOpened}
+        right={90}
+        top={0}
+        overlay={() => toggleMoreOptions(column)}
+        overlayZIndex={9999}
+      >
+        <div
+          style={{
+            // opacity,
+            zIndex: 10000,
+            position: 'absolute'
+          }}
+          className="more-options"
         >
-          <div
-            className="sort"
-            onClick={() => {
-              setSortColumn(column);
-              onClose();
-            }}
-          >
-            <ArrowDown height="13" style={{marginRight: '5px'}} width="13" />
-
-            {'Sort Column'}
-          </div>
-
-          <div
-            className="sort"
-            onClick={() => {
-              setSortColumn(column, mode, true);
-              onClose();
-            }}
-          >
-            <ArrowDown height="13" style={{marginRight: '5px'}} width="13" />
-
-            {`Multi Sort (${Object.keys(sortColumn).length + 1})`}
-          </div>
-
-          {isSorted && (
+          <MoreOptions>
             <div
-              className="cancel"
+              className="sort"
               onClick={() => {
-                unsortColumn(mode);
+                setSortColumn(column);
                 onClose();
               }}
             >
-              <Cancel height="13" style={{marginRight: '5px'}} width="13" />
+              <ArrowDown height="13" style={{marginRight: '5px'}} width="13" />
 
-              {`Unsort Column${isNSorted ? 's' : ''}`}
+              {'Sort Column'}
             </div>
-          )}
 
-          <div
-            className="pin"
-            onClick={() => {
-              pinColumn(column, mode);
-              onClose();
-            }}
-          >
-            <Pin height="13" style={{marginRight: '5px'}} width="13" />
+            <div
+              className="sort"
+              onClick={() => {
+                setSortColumn(column, mode, true);
+                onClose();
+              }}
+            >
+              <ArrowDown height="13" style={{marginRight: '5px'}} width="13" />
 
-            {'Pin Column'}
-          </div>
+              {`Multi Sort (${Object.keys(sortColumn).length + 1})`}
+            </div>
 
-          <div
-            className="col-link"
-            onClick={() => {
-              copyColumn(column);
-              onClose();
-            }}
-          >
-            <Clipboard height="13px" style={{marginRight: '10px'}} width="13" />
+            {isSorted && (
+              <div
+                className="cancel"
+                onClick={() => {
+                  unsortColumn(mode);
+                  onClose();
+                }}
+              >
+                <Cancel height="13" style={{marginRight: '5px'}} width="13" />
 
-            {'Copy Column'}
-          </div>
-        </ClickOutsideCloseDropdown>
-      </StyledOptionsDropdown>
+                {`Unsort Column${isNSorted ? 's' : ''}`}
+              </div>
+            )}
+
+            <div
+              className="pin"
+              onClick={() => {
+                pinColumn(column, mode);
+                onClose();
+              }}
+            >
+              <Pin height="13" style={{marginRight: '5px'}} width="13" />
+
+              {'Pin Column'}
+            </div>
+
+            <div
+              className="col-link"
+              onClick={() => {
+                copyColumn(column);
+                onClose();
+              }}
+            >
+              <Clipboard height="13px" style={{marginRight: '10px'}} width="13" />
+
+              {'Copy Column'}
+            </div>
+          </MoreOptions>
+        </div>
+      </Portaled>
     );
   }
 }

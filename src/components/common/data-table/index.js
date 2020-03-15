@@ -327,7 +327,7 @@ const renderHeaderCell = (columns, isPinned, props, toggleMoreOptions, moreOptio
           <Button className="more" onClick={() => toggleMoreOptions(column)}>
             <VertThreeDots height="14px" />
           </Button>
-          {/* <OptionDropdown
+          <OptionDropdown
             isOpened={moreOptionsColumn === column}
             column={column}
             toggleMoreOptions={toggleMoreOptions}
@@ -339,8 +339,8 @@ const renderHeaderCell = (columns, isPinned, props, toggleMoreOptions, moreOptio
             isSorted={isSorted}
             unsortColumn={unsortColumn}
             isNSorted={isNSorted}
-          /> */}
-
+          />
+          {/*
           <Portaled
             // motionStyle={(spring, visible) => ({
             //   opacity: visible ? 1 : 0
@@ -424,6 +424,7 @@ const renderHeaderCell = (columns, isPinned, props, toggleMoreOptions, moreOptio
               </MoreOptions>
             </div>
           </Portaled>
+                */}
         </section>
       </div>
     );

@@ -141,9 +141,10 @@ function DataTableModalFactory(DataTable) {
               columns={columns}
               dedupedColumns={columns}
               dedupedColMeta={dedupedColMeta}
-              pinnedColumns={columns.slice(0, 3)}
+              // pinnedColumns={columns.slice(0, 3)}
               cellSizeCache={cellSizeCache}
-              unpinnedColumns={columns.slice(3, columns.length)}
+              unpinnedColumns={columns}
+              // unpinnedColumns={columns.slice(3, columns.length)}
               hoverHighlight
             />
           </TableContainer>
