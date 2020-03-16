@@ -50,7 +50,7 @@ export const subtextColorActive = '#FFFFFF';
 
 export const titleTextColor = '#FFFFFF';
 export const textColorHl = '#F0F0F0';
-export const textColorHlLT = '#F1F1F1';
+export const textColorHlLT = '#000000';
 export const activeColor = '#1FBAD6';
 export const activeColorLT = '#2473BD';
 export const activeColorHover = '#108188';
@@ -74,7 +74,7 @@ export const secondaryBtnBgdHover = '#A0A7B4';
 export const linkBtnBgd = 'transparent';
 export const linkBtnActBgd = linkBtnBgd;
 export const linkBtnColor = '#A0A7B4';
-export const linkBtnActColor = textColorHlLT;
+export const linkBtnActColor = '#F1F1F1';
 export const linkBtnActBgdHover = linkBtnBgd;
 
 export const negativeBtnBgd = errorColor;
@@ -137,8 +137,10 @@ export const selectBorderRadius = '1px';
 export const selectBorder = 0;
 
 export const dropdownListHighlightBg = '#6A7485';
+export const dropdownListHighlightBgLT = '#F8F8F9';
 export const dropdownListShadow = '0 6px 12px 0 rgba(0,0,0,0.16)';
 export const dropdownListBgd = '#3A414C';
+export const dropdownListBgdLT = '#FFFFFF';
 export const dropdownListBorderTop = '#242730';
 export const dropdownWrapperZ = 100;
 // Switch
@@ -262,7 +264,10 @@ export const notificationPanelItemHeight = 60;
 // Data Table
 const headerRowHeight = 60;
 const rowHeight = 32;
+const headerPaddingTop = 3;
+const headerPaddingBottom = 8;
 const cellPaddingSide = 10;
+const edgeCellPaddingSide = 10;
 const cellFontSize = 10;
 const gridPaddingSide = 24;
 const headerCellBackground = '#FFFFFF';
@@ -632,11 +637,15 @@ const dropdownListAnchor = css`
   padding-left: 3px;
 `;
 
-const dropdownListItem = css`
+const dropdownListSize = css`
   font-size: 11px;
   padding: 3px 9px;
   font-weight: 500;
+  white-space: nowrap;
+`;
 
+const dropdownListItem = css`
+  ${dropdownListSize}
   &.hover,
   &:hover {
     cursor: pointer;
@@ -644,6 +653,22 @@ const dropdownListItem = css`
 
     .list__item__anchor {
       color: ${props => props.theme.textColorHl};
+    }
+  }
+`;
+
+const dropdownListItemLT = css`
+  ${dropdownListSize}
+  color: ${props => props.theme.textColorLT};
+
+  &.hover,
+  &:hover {
+    cursor: pointer;
+    color: ${props => props.theme.textColorHlLT};
+    background-color: ${props => props.theme.dropdownListHighlightBgLT};
+
+    .list__item__anchor {
+      color: ${props => props.theme.textColorHlLT};
     }
   }
 `;
@@ -684,6 +709,12 @@ const dropdownList = css`
   ${props => props.theme.dropdownScrollBar};
 `;
 
+const dropdownListLT = css`
+  ${dropdownList}
+  .list__item {
+    ${props => props.theme.dropdownListItemLT};
+  }
+`;
 const sidePanelScrollBar = css`
   ::-webkit-scrollbar {
     height: ${props => props.theme.sidePanelScrollBarHeight}px;
@@ -817,7 +848,9 @@ export const theme = {
   secondaryInput,
   dropdownScrollBar,
   dropdownList,
+  dropdownListLT,
   dropdownListItem,
+  dropdownListItemLT,
   dropdownListAnchor,
   dropdownListHeader,
   dropdownListSection,
@@ -846,7 +879,9 @@ export const theme = {
   boxShadow,
   errorColor,
   dropdownListHighlightBg,
+  dropdownListHighlightBgLT,
   dropdownListBgd,
+  dropdownListBgdLT,
   dropdownListBorderTop,
 
   labelColor,
@@ -1057,7 +1092,10 @@ export const theme = {
   // Data Table
   headerRowHeight,
   rowHeight,
+  headerPaddingTop,
+  headerPaddingBottom,
   cellPaddingSide,
+  edgeCellPaddingSide,
   cellFontSize,
   gridPaddingSide,
   optionButtonColor,

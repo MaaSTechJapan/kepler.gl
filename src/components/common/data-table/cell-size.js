@@ -19,15 +19,19 @@
 // THE SOFTWARE.
 
 import document from 'global/document';
+import {parseFieldValue} from 'utils/data-utils';
 
 export function renderedSize({
-  text: {rows, columns},
-  colIdx = 0,
+  text: {rows, column},
+  type = 'string',
+  colIdx,
   numRowsToCalculate = 10,
   fontSize = 12,
   font = 'Lato',
-  cellPadding = 50,
-  maxCellSize = 400
+  cellPadding = 30,
+  maxCellSize = 400,
+  minCellSize = 45,
+  optionsButton = 20
 }) {
   if (!document) {
     return 0;
@@ -46,13 +50,14 @@ export function renderedSize({
   }
   const rowWidth = Math.max(
     ...rowsToSample.map(
-      rowIdx => Math.ceil(context.measureText(rows[rowIdx][colIdx]).width) + cellPadding
+      rowIdx =>
+        Math.ceil(context.measureText(parseFieldValue(rows[rowIdx][colIdx], type)).width) +
+        cellPadding
     )
   );
-  const columnWidth = Math.ceil(context.measureText(columns[colIdx]).width) + cellPadding;
-  const width = Math.max(rowWidth, columnWidth);
+  const minRowWidth = minCellSize + cellPadding;
   textCanvas.parentElement.removeChild(textCanvas);
-  return Math.min(maxCellSize, width);
+  return Math.max(Math.min(maxCellSize, rowWidth), minRowWidth);
 }
 
 export function expandLastCell(stateCache, width, sumSize, lastCell) {

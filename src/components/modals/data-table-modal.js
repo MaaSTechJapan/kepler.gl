@@ -88,6 +88,7 @@ function DataTableModalFactory(DataTable) {
   class DataTableModal extends React.Component {
     fields = props => (props.datasets[props.dataId] || {}).fields;
     rows = props => (props.datasets[props.dataId] || {}).allData;
+    pinnedColumns = props => (props.datasets[props.dataId] || {}).pinnedColumns;
     columns = createSelector(this.fields, fields => fields.map(f => f.name));
     dedupedColMeta = createSelector(this.fields, fields =>
       fields.reduce(
@@ -98,34 +99,42 @@ function DataTableModalFactory(DataTable) {
         {}
       )
     );
-    cellSizeCache = createSelector(this.columns, this.rows, (columns, rows) =>
-      columns.reduce(
-        (acc, val, colIdx) => ({
+    cellSizeCache = createSelector(this.fields, this.rows, (fields, rows) =>
+      fields.reduce(
+        (acc, field, colIdx) => ({
           ...acc,
-          [val]: renderedSize({
+          [field.name]: renderedSize({
             text: {
               rows,
-              columns
+              column: field.name
             },
             colIdx,
-            optionsButton: 33
+            type: field.type
           })
         }),
         {}
       )
     );
+    unpinnedColumns = createSelector(this.columns, this.pinnedColumns, (columns, pinnedColumns) => {
+      return !pinnedColumns || pinnedColumns.length
+        ? columns
+        : columns.filter(c => !pinnedColumns.includes(c));
+    });
 
     render() {
-      const {datasets, dataId, showDatasetTable} = this.props;
+      const {datasets, dataId, showDatasetTable, sortTableColumn, pinTableColumn} = this.props;
       if (!datasets || !dataId) {
         return null;
       }
 
       const activeDataset = datasets[dataId];
+      const sortOrder = activeDataset.sortOrder;
+
       const rows = this.rows(this.props);
       const columns = this.columns(this.props);
       const dedupedColMeta = this.dedupedColMeta(this.props);
       const cellSizeCache = this.cellSizeCache(this.props);
+      const unpinnedColumns = this.unpinnedColumns(this.props);
 
       return (
         <StyledModal className="dataset-modal" id="dataset-modal">
@@ -137,15 +146,20 @@ function DataTableModalFactory(DataTable) {
             />
             <DataTable
               rows={rows}
+              dataId={dataId}
               rowCount={rows.length}
               columns={columns}
               dedupedColumns={columns}
               dedupedColMeta={dedupedColMeta}
-              // pinnedColumns={columns.slice(0, 3)}
+              pinnedColumns={activeDataset.pinnedColumns}
+              sortColumn={activeDataset.sortColumn}
+              pinTableColumn={pinTableColumn}
+              unpinnedColumns={unpinnedColumns}
               cellSizeCache={cellSizeCache}
-              unpinnedColumns={columns}
-              // unpinnedColumns={columns.slice(3, columns.length)}
-              hoverHighlight
+              sortTableColumn={sortTableColumn}
+              sortOrder={sortOrder}
+              unpinnedColumns={columns.slice(3, columns.length)}
+              // hoverHighlight
             />
           </TableContainer>
         </StyledModal>

@@ -308,6 +308,10 @@ export const ALL_FIELD_TYPES = keyMirror({
   point: null
 });
 
+export const SORT_ORDER = keyMirror({
+  ascending: null,
+  descending: null
+})
 const ORANGE = '248, 194, 28';
 const PINK = '231, 189, 194';
 const PURPLE = '160, 106, 206';

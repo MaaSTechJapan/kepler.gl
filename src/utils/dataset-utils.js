@@ -20,10 +20,11 @@
 
 import {hexToRgb} from './color-utils';
 import uniq from 'lodash.uniq';
-import {TRIP_POINT_FIELDS} from 'constants/default-settings';
+import {TRIP_POINT_FIELDS, SORT_ORDER} from 'constants/default-settings';
 import {generateHashId} from './utils';
 import {validateInputData} from 'processors/data-processor';
 import {getGpuFilterProps} from 'utils/gpu-filter-utils';
+import {ascending, descending} from 'd3-array';
 
 // apply a color for each dataset
 // to use as label colors
@@ -161,4 +162,30 @@ export function findPointFieldPairs(fields) {
     }
     return carry;
   }, []);
+}
+
+export function sortDatasetByColumn(dataset, column) {
+  const {allIndexes, fields, allData, sortColumn = {}} = dataset;
+  const fieldIndex = fields.findIndex(f => f.name === column);
+  if (fieldIndex < 0) {
+    return dataset;
+  }
+  //
+  const sortBy = sortColumn[column]
+    ? Object.keys(SORT_ORDER).find(od => od !== sortColumn[column])
+    : SORT_ORDER.ascending;
+
+  const sortFunction = sortBy === SORT_ORDER.ascending ? ascending : descending;
+  const sortOrder = allIndexes
+    .slice()
+    .sort((a, b) => sortFunction(allData[a][fieldIndex], allData[b][fieldIndex]));
+
+  return {
+    ...dataset,
+    sortColumn: {
+      ...dataset.sortColumn,
+      [column]: sortBy
+    },
+    sortOrder
+  };
 }

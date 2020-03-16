@@ -29,6 +29,7 @@ import debounce from 'lodash.debounce';
 import {VertThreeDots} from 'components/common/icons';
 import FieldToken from 'components/common/field-token';
 import OptionDropdown from './option-dropdown';
+import {ALL_FIELD_TYPES, SORT_ORDER} from 'constants/default-settings';
 
 // import without from 'lodash/without';
 // import union from 'lodash/union';
@@ -37,20 +38,24 @@ import Grid from './grid';
 import Button from './button';
 import Portaled from './portaled';
 import MoreOptions from './more-options';
-import {Pin, ArrowDown, Clipboard, Cancel} from 'components/common/icons';
+import {Pin, ArrowDownAlt, ArrowUpAlt, Clipboard, Cancel} from 'components/common/icons';
 import {parseFieldValue} from 'utils/data-utils';
 import {getSizeSum, expandLastCell, shrinkFinalCell} from './cell-size';
 
-// import {createToast} from 'reducers/toasts';
-// import {pinColumn, getReports} from 'reducers/reports';
-// import {setSortColumn, unsortColumn, copyColumn} from 'reducers/results';
-// import {openModal} from 'reducers/modals';
-// import {getUserSetting} from 'reducers/user';
+const iconOrder = {
+  [SORT_ORDER.ascending]: ArrowUpAlt,
+  [SORT_ORDER.descending]: ArrowDownAlt,
+  [SORT_ORDER.ascending]: ArrowUpAlt
+};
 
 const defaultHeaderRowHeight = 55;
 const defaultRowHeight = 32;
 const overscanColumnCount = 10;
 const overscanRowCount = 10;
+const fieldToAlignRight = {
+  [ALL_FIELD_TYPES.integer]: true,
+  [ALL_FIELD_TYPES.real]: true
+};
 
 export const Container = styled.div`
   display: flex;
@@ -147,7 +152,6 @@ export const Container = styled.div`
     .odd-row {
       background-color: ${props => props.theme.oddRowBackground};
     }
-
     .cell,
     .header-cell {
       width: 100%;
@@ -175,17 +179,28 @@ export const Container = styled.div`
         text-decoration: none;
       }
     }
-    .end-cell {
+    .cell.end-cell,
+    .header-cell.end-cell {
       border-right: none;
+      padding-right: ${props => props.theme.cellPaddingSide + props.theme.edgeCellPaddingSide}px;
     }
-    .bottom-cell {
+    .cell.first-cell,
+    .header-cell.first-cell {
+      padding-left: ${props => props.theme.cellPaddingSide + props.theme.edgeCellPaddingSide}px;
+    }
+    .cell.bottom-cell {
       border-bottom: none;
     }
-
+    .cell.align-right {
+      align-items: flex-end;
+    }
     .header-cell {
       border-bottom: 1px solid ${props => props.theme.headerCellBorderColor};
       border-top: 1px solid ${props => props.theme.headerCellBorderColor};
-      padding: 8px 15px;
+      padding-top: ${props => props.theme.headerPaddingTop}px;
+      padding-right: 0;
+      padding-bottom: ${props => props.theme.headerPaddingBottom}px;
+      padding-left: ${props => props.theme.cellPaddingSide}px;
       align-items: center;
       justify-content: space-between;
       display: flex;
@@ -199,14 +214,16 @@ export const Container = styled.div`
           }
         }
       }
-
+      .n-sort-idx {
+        font-size: 9px;
+      }
       .details {
         font-weight: 500;
         display: flex;
         flex-direction: column;
         justify-content: space-around;
         height: 100%;
-
+        overflow: hidden;
         .col-name {
           display: flex;
           align-items: center;
@@ -247,25 +264,17 @@ const columnWidthFunction = (columns, cellSizeCache) => ({index}) => {
  * This is an accessor method used to generlize getting a cell from a data row
  */
 const getRowCell = ({
-  // columnIndex,
-  // pinnedColumns,
-  // unpinnedColumns,
   rows,
   column,
   dedupedColumns,
   dedupedColMeta,
-  // columns,
-  // shouldPin,
   rowIndex,
   sortColumn,
   sortOrder
 }) => {
-  // const column = shouldPin ? pinnedColumns[columnIndex] : unpinnedColumns[columnIndex];
-  // const column = columns[columnIndex];
   const rowIdx =
-    Boolean(Object.keys(sortColumn).length) && Boolean(sortOrder.length)
-      ? get(sortOrder, rowIndex, rowIndex)
-      : rowIndex;
+    // Boolean(Object.keys(sortColumn).length) &&
+    sortOrder && sortOrder.length ? get(sortOrder, rowIndex) : rowIndex;
   const type = dedupedColMeta[column];
   return parseFieldValue(get(rows, [rowIdx, dedupedColumns.indexOf(column)], 'Err'), type);
 };
@@ -275,46 +284,42 @@ const renderHeaderCell = (columns, isPinned, props, toggleMoreOptions, moreOptio
   return cellInfo => {
     const {columnIndex, key, style} = cellInfo;
     const {
-      // columnIndex,
-      // key,
-      // style,
-      // pinnedColumns,
-      // unpinnedColumns,
-      // isPinned,
       dedupedColMeta,
       mode,
       sortColumn,
-      setSortColumn,
+      sortTableColumn,
       unsortColumn,
-      pinColumn,
-      copyColumn
+      pinTableColumn,
+      copyColumn,
+      dataId
     } = props;
-    // const shouldPin = isPinned && columnIndex < pinnedColumns.length;
-    // const column = shouldPin ? pinnedColumns[columnIndex] : unpinnedColumns[columnIndex];
+
     const column = columns[columnIndex];
-    const iconOrder = {
-      asc: ArrowDown,
-      desc: ArrowDown,
-      default: ArrowDown
-    };
+
     const isSorted = Boolean(sortColumn[column]);
     const isNSorted = Object.keys(sortColumn).length > 1;
-    const Icon = isSorted ? iconOrder[sortColumn[column].direction] : iconOrder.default;
+    const Icon = isSorted ? iconOrder[sortColumn[column]] : iconOrder.default;
+    console.log(Icon)
+    const firstCell = columnIndex === 0;
 
     return (
       <div
-        className={classnames('header-cell', {'pinned-header-cell': isPinned})}
+        className={classnames('header-cell', {
+          'pinned-header-cell': isPinned,
+          'first-cell': firstCell
+        })}
         key={key}
         style={style}
         onClick={e => {
-          e.shiftKey ? setSortColumn(column, mode, true) : null;
+          e.shiftKey ? sortTableColumn(dataId, column, mode, true) : null;
         }}
-        onDoubleClick={() => setSortColumn(column, mode)}
+        onDoubleClick={() => sortTableColumn(dataId, column, mode)}
+        title={column}
       >
         <section className="details">
           <div className="col-name">
             {column}
-            {isSorted && <Icon height="10" width="10" />}
+            {isSorted && <iconOrder.ascending height="10" width="10" />}
             {isSorted && isNSorted && (
               <div className="n-sort-idx">{`${sortColumn[column].idx}`}</div>
             )}
@@ -329,102 +334,18 @@ const renderHeaderCell = (columns, isPinned, props, toggleMoreOptions, moreOptio
           </Button>
           <OptionDropdown
             isOpened={moreOptionsColumn === column}
+            type={dedupedColMeta[column]}
             column={column}
             toggleMoreOptions={toggleMoreOptions}
-            setSortColumn={setSortColumn}
+            sortTableColumn={() => sortTableColumn(dataId, column)}
             mode={mode}
             sortColumn={sortColumn}
-            pinColumn={pinColumn}
+            pinTableColumn={() => pinTableColumn(dataId, column)}
             copyColumn={copyColumn}
             isSorted={isSorted}
             unsortColumn={unsortColumn}
             isNSorted={isNSorted}
           />
-          {/*
-          <Portaled
-            // motionStyle={(spring, visible) => ({
-            //   opacity: visible ? 1 : 0
-            // })}
-            isOpened={moreOptionsColumn === column}
-            right={90}
-            top={0}
-            overlay={() => toggleMoreOptions(column)}
-            overlayZIndex={9999}
-          >
-            <div
-              style={{
-                // opacity,
-                zIndex: 10000,
-                position: 'absolute'
-              }}
-              className="more-options"
-            >
-              <MoreOptions>
-                <div
-                  className="sort"
-                  onClick={() => {
-                    setSortColumn(column, mode);
-                    toggleMoreOptions(column);
-                  }}
-                >
-                  <Icon height="13" style={{marginRight: '5px'}} width="13" />
-
-                  {'Sort Column'}
-                </div>
-
-                <div
-                  className="sort"
-                  onClick={() => {
-                    setSortColumn(column, mode, true);
-                    toggleMoreOptions(column);
-                  }}
-                >
-                  <Icon height="13" style={{marginRight: '5px'}} width="13" />
-
-                  {`Multi Sort (${Object.keys(sortColumn).length + 1})`}
-                </div>
-
-                {isSorted && (
-                  <div
-                    className="sort"
-                    onClick={() => {
-                      unsortColumn(mode);
-                      toggleMoreOptions(column);
-                    }}
-                  >
-                    <Cancel height="13" style={{marginRight: '5px'}} width="13" />
-
-                    {`Unsort Column${isNSorted ? 's' : ''}`}
-                  </div>
-                )}
-
-                <div
-                  className="pin"
-                  onClick={() => {
-                    pinColumn(column, mode);
-                    toggleMoreOptions(column);
-                  }}
-                >
-                  <Pin height="13" style={{marginRight: '5px'}} width="13" />
-
-                  {'Pin Column'}
-                </div>
-
-                <div
-                  className="col-link"
-                  onClick={() => {
-                    copyColumn(column);
-                    toggleMoreOptions(column);
-                  }}
-                >
-                  <Clipboard height="13" style={{marginRight: '10px'}} width="13" />
-
-                  {'Copy Column'}
-                </div>
-              </MoreOptions>
-            </div>
-          </Portaled>
-                */}
         </section>
       </div>
     );
@@ -436,12 +357,15 @@ const renderDataCell = (columns, isPinned, props, hover, hoverCell) => {
   // eslint-disable-next-line complexity
   return cellInfo => {
     const {columnIndex, key, style, rowIndex} = cellInfo;
-    const {cellSizeLimit, rows} = props;
+    const {cellSizeLimit, rows, dedupedColMeta} = props;
     // const shouldPin = isPinned && columnIndex < pinnedColumns.length;
     const column = columns[columnIndex];
     const rowCell = validateCellDataSize(getRowCell({...props, column, rowIndex}), {cellSizeLimit});
     const endCell = columnIndex === columns.length - 1;
+    const firstCell = columnIndex === 0;
     const bottomCell = rowIndex === rows.length - 1;
+    const type = dedupedColMeta[column];
+    const alignRight = fieldToAlignRight[type];
 
     const hoveredItem =
       rowIndex === hover.rowIndex ||
@@ -452,12 +376,15 @@ const renderDataCell = (columns, isPinned, props, hover, hoverCell) => {
         className={classnames('cell', {
           [rowIndex % 2 === 0 ? 'even-row' : 'odd-row']: true,
           'pinned-cell': isPinned,
+          'first-cell': firstCell,
           'end-cell': endCell,
           'bottom-cell': bottomCell,
+          'align-right': alignRight,
           hovered: hoveredItem
         })}
         key={key}
         style={style}
+        title={rowCell}
         {...(hoverCell
           ? {
               onMouseOver: () =>
@@ -540,7 +467,7 @@ const renderDataCell = (columns, isPinned, props, hover, hoverCell) => {
 
 // @connect(
 //   mapStateToProps,
-//   {createToast, setSortColumn, unsortColumn, pinColumn, openModal, copyColumn},
+//   {createToast, setSortColumn, unsortColumn, pinTableColumn, openModal, copyColumn},
 //   (state, dispatch, own) => ({...state, ...dispatch, ...own})
 // )
 

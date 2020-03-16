@@ -20,8 +20,10 @@
 
 export {default as Add} from './add';
 export {default as ArrowDown} from './arrow-down';
+export {default as ArrowDownAlt} from './arrow-down-alt';
 export {default as ArrowLeft} from './arrow-left';
 export {default as ArrowRight} from './arrow-right';
+export {default as ArrowUpAlt} from './arrow-up-alt';
 export {default as Base} from './base';
 export {default as Bug} from './bug';
 export {default as Cancel} from './cancel';

@@ -276,6 +276,31 @@ export function showDatasetTable(dataId) {
 }
 
 /**
+ * Sort dataset column, for table display
+ * @param {string} dataId
+ * @param {string} column
+ */
+export function sortTableColumn(dataId, column) {
+  return {
+    type: ActionTypes.SORT_TABLE_COLUMN,
+    dataId,
+    column
+  };
+}
+
+/**
+ * Pin dataset column, for table display
+ * @param {string} dataId
+ * @param {string} column
+ */
+export function pinTableColumn(dataId, column) {
+  return {
+    type: ActionTypes.PIN_TABLE_COLUMN,
+    dataId,
+    column
+  };
+}
+/**
  * Add new dataset to `visState`, with option to load a map config along with the datasets
  * @memberof visStateActions
  * @param {Array<Object>|Object} datasets - ***required** datasets can be a dataset or an array of datasets

@@ -50,7 +50,7 @@ import {
   updateFilterDataId
 } from 'utils/filter-utils';
 import {setFilterGpuMode, assignGpuChannel} from 'utils/gpu-filter-utils';
-import {createNewDataEntry} from 'utils/dataset-utils';
+import {createNewDataEntry, sortDatasetByColumn} from 'utils/dataset-utils';
 import {set, toArray, generateHashId} from 'utils/utils';
 
 import {findDefaultLayer, calculateLayerData} from 'utils/layer-utils/layer-utils';
@@ -1772,6 +1772,44 @@ export function setPolygonFilterLayerUpdater(state, payload) {
     prop: 'layerId',
     value: newLayerId
   });
+}
+
+export function sortTableColumnUpdater(state, {dataId, column}) {
+  const dataset = state.datasets[dataId];
+  if (!dataset) {
+    return state;
+  }
+  // const {allIndexes, fields, allData, sortColumn = {}} = dataset;
+  // const fieldIndex = fields.findIndex(f => f.name === column);
+  // if (fieldIndex < 0) {
+  //   return state;
+  // }
+
+  // const sortOrder = allIndexes
+  //   .slice()
+  //   .sort((a, b) => ascending(allData[a][fieldIndex], allData[b][fieldIndex]));
+  // console.log(sortOrder)
+  // const sortColumn = {
+  //   ...dataset.sortColumn,
+  //   [f.name]:
+  // }
+  const sorted = sortDatasetByColumn(dataset, column);
+  return set(['datasets', dataId], sorted, state);
+}
+
+export function pinTableColumnUpdater(state, {dataId, column}) {
+  const dataset = state.datasets[dataId];
+  if (!dataset) {
+    return state;
+  }
+  const field = dataset.fields.find(f => f.name === column);
+  if (!field) {
+    return state;
+  }
+
+  const pinnedColumns = (dataset.pinnedColumns || []).concat(field.name);
+
+  return set(['datasets', dataId, 'pinnedColumns'], pinnedColumns, state);
 }
 
 /**

@@ -265,6 +265,8 @@ export default function ModalContainerFactory(
                 datasets={datasets}
                 dataId={editingDataset}
                 showDatasetTable={visStateActions.showDatasetTable}
+                sortTableColumn={visStateActions.sortTableColumn}
+                pinTableColumn={visStateActions.pinTableColumn}
               />
             );
 

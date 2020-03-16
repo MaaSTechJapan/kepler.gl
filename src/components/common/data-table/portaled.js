@@ -18,11 +18,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import React, {Component} from 'react';
+import React, {Component, createRef} from 'react';
 import debounce from 'lodash.debounce';
 import {canUseDOM} from 'exenv';
-// import {Motion, spring} from 'react-motion';
-// import Portal from 'react-portal/lib/Portal';
+import {withTheme} from 'styled-components';
+import {RootContext} from 'components/context';
 import Modal from 'react-modal';
 
 const listeners = {};
@@ -62,23 +62,23 @@ function subscribe(fn) {
   return () => delete listeners[id];
 }
 
-// const Overlay = styled.div`
-//   position: fixed;
-//   top: 0;
-//   left: 0;
-//   right: 0;
-//   bottom: 0;
-// `;
+const defaultModalStyle = {
+  content: {
+    top: 0,
+    left: 0,
+    border: 0,
+    right: 'auto',
+    bottom: 'auto',
+    padding: '0px 0px 0px 0px'
+  },
+  overlay: {
+    right: 'auto',
+    bottom: 'auto',
+    backgroundColor: 'rgba(0, 0, 0, 0)'
+  }
+};
 
-// const Reset = styled.div`
-//   font-size: 12px;
-//   font-family: 'Lato', 'Open Sans';
-
-//   * {
-//     box-sizing: border-box;
-//   }
-// `;
-export default class Portaled extends Component {
+class Portaled extends Component {
   static defaultProps = {
     left: 0,
     top: 0,
@@ -92,9 +92,10 @@ export default class Portaled extends Component {
     left: 0,
     top: 0,
     isPortalOpened: false,
-    isVisible: false,
-    isAnimated: false
+    isVisible: false
   };
+
+  element = createRef();
 
   UNSAFE_componentWillMount() {
     if (this.props.isOpened) {
@@ -108,8 +109,8 @@ export default class Portaled extends Component {
   componentDidMount() {
     // relative
     this.handleScroll = () => {
-      if (this.element) {
-        const rect = this.element.getBoundingClientRect();
+      if (this.element.current) {
+        const rect = this.element.current.getBoundingClientRect();
         const pageOffset = getPageOffset();
         const top = pageOffset.y + rect.top;
         const right = window.innerWidth - rect.right - pageOffset.x;
@@ -129,13 +130,13 @@ export default class Portaled extends Component {
     const {isVisible, isPortalOpened} = this.state;
 
     const willOpen = !isOpened && nextProps.isOpened;
-    if (willOpen) this.setState({isPortalOpened: true, isAnimated: true});
+    if (willOpen) this.setState({isPortalOpened: true});
 
     const willClose = isOpened && !nextProps.isOpened;
-    if (willClose) this.setState({isVisible: false, isAnimated: true});
+    if (willClose) this.setState({isVisible: false});
 
     const hasReopened = willOpen && !isVisible && isPortalOpened;
-    if (hasReopened) this.setState({isVisible: true, isAnimated: true});
+    if (hasReopened) this.setState({isVisible: true});
   }
 
   componentDidUpdate(prevProps) {
@@ -156,10 +157,8 @@ export default class Portaled extends Component {
 
   handleRest = () => {
     if (!this.state.isVisible) {
-      this.setState({isPortalOpened: false, isAnimated: false});
+      this.setState({isPortalOpened: false});
       this.props.onHide();
-    } else {
-      this.setState({isAnimated: false});
     }
   };
 
@@ -171,15 +170,14 @@ export default class Portaled extends Component {
       left,
       right,
       fullWidth,
-      overlay,
       overlayZIndex,
 
       // Mortal
       children,
-      portalProps
+      modalProps
     } = this.props;
 
-    const {isPortalOpened, isVisible, isAnimated} = this.state;
+    const {isPortalOpened, isVisible} = this.state;
 
     const fromLeftOrRight =
       right !== undefined ? {right: this.state.right + right} : {left: this.state.left + left};
@@ -188,41 +186,55 @@ export default class Portaled extends Component {
       ? {right: this.state.right + right, left: this.state.left + left}
       : fromLeftOrRight;
 
-    if (!isPortalOpened) {
-      return null;
-    }
+    const modalStyle = {
+      ...defaultModalStyle,
+      overlay: {
+        ...defaultModalStyle.overlay,
+        // needs to be on top of existing modal
+        zIndex: overlayZIndex
+      }
+    };
 
     return (
-      <Comp
-        ref={element => {
-          this.element = element;
-        }}
-      >
-        <Modal className="portal" {...portalProps}>
-          {/* {overlay && (
-            <Overlay
-              key="overlay"
-              onClick={() => overlay()}
-              style={{
-                zIndex: overlayZIndex,
-                opacity: isVisible ? 1 : 0,
-                pointerEvents: isVisible ? 'auto' : 'none'
-              }}
-            />
-          )} */}
-          <div
-            key="item"
-            style={{
-              position: 'absolute',
-              opacity: isVisible ? 1 : 0,
-              top: this.state.top + top,
-              ...horizontalPosition
-            }}
-          >
-            {children}
-          </div>
-        </Modal>
-      </Comp>
+      <RootContext.Consumer>
+        {context =>
+          isPortalOpened ? (
+            <Comp ref={this.element}>
+              <Modal
+                className="modal-portal"
+                {...modalProps}
+                ariaHideApp={false}
+                isOpen
+                style={modalStyle}
+                parentSelector={() => {
+                  // React modal issue: https://github.com/reactjs/react-modal/issues/769
+                  // failed to execute removeChild on parent node when it is already unmounted
+                  return (
+                    (context && context.current) || {
+                      removeChild: () => {},
+                      appendChild: () => {}
+                    }
+                  );
+                }}
+              >
+                <div
+                  key="item"
+                  style={{
+                    position: 'fixed',
+                    opacity: isVisible ? 1 : 0,
+                    top: this.state.top + top,
+                    ...horizontalPosition
+                  }}
+                >
+                  {children}
+                </div>
+              </Modal>
+            </Comp>
+          ) : null
+        }
+      </RootContext.Consumer>
     );
   }
 }
+
+export default withTheme(Portaled);
