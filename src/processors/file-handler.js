@@ -37,13 +37,13 @@ const FILE_HANDLERS = {
 export function readFile({file, fileCache = []}) {
   return new Promise((resolve, reject) => {
     const {handler, format} = getFileHandler(file);
-    if (!handler) {
+/*    if (!handler) {
       Console.warn(
         `Canont determine file handler for file ${file.name}. It must have a valid file extension`
       );
       resolve(fileCache);
     }
-
+*/
     handler({file, format}).then(result => {
       if (!result || !result.data) {
         // return fileCache, to keep process other files
