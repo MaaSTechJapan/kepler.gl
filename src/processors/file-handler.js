@@ -70,6 +70,7 @@ export function getFileHandler(fileBlob) {
 }
 
 export function getFileType(filename) {
+  console.log(filename);
   if (filename.endsWith('csv')) {
     return 'csv';
   } else if (filename.endsWith('json') || filename.endsWith('geojson')) {
