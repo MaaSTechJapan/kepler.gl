@@ -76,7 +76,7 @@ export function getFileType(filename) {
     // Read GeoJson from browser
     return 'json';
   } else {
-    return 'csv';
+    return 'json';
   }
 
   // Wait to add other file type handler
