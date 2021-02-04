@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "build": "env MapboxAccessToken=sk.eyJ1IjoibXRqIiwiYSI6ImNra3IxcHhnYjA5cWkycHBjcDd5eXNtaTgifQ.ghKo2UbzOhdiwMfFP_BVSA webpack && cp ./index.html build/index.html",
+    "build": "env MapboxAccessToken=pk.eyJ1IjoibXRqIiwiYSI6ImNra3IyNXU0djBhaXYycG51NjVqeWUxOTAifQ.eItrUacD-edo5gQL_NeklA webpack && cp ./index.html build/index.html",
     "start": "webpack-dev-server --mode development --progress --hot --open",
     "start-prod": "webpack-dev-server -p --progress --hot --open",
     "start-local": "webpack-dev-server --mode development --env.es6 --progress --hot --open",
